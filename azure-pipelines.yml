@@ -4,31 +4,45 @@
 # https://docs.microsoft.com/azure/devops/pipelines/languages/dotnet-core
 
 trigger:
-- main
+- '*'
 
 pool:
-  vmImage: 'windows-latest'
+  vmImage: 'ubuntu-20.04'
+  demands:
+  - npm
 
 variables:
-  solution: '**/*.sln'
-  buildPlatform: 'Any CPU'
   buildConfiguration: 'Release'
 
 steps:
-- task: NuGetToolInstaller@1
-
-- task: NuGetCommand@2
+- task: UseDotNet@2
+  displayName: 'Use .Net SDK 5.x'
   inputs:
-    restoreSolution: '$(solution)'
-
-- task: VSBuild@1
+    packageType: sdk
+    version: '5.x'
+- task: Npm@1
+  displayName: 'Run npm instal'
   inputs:
-    solution: '$(solution)'
-    msbuildArgs: '/p:DeployOnBuild=true /p:WebPublishMethod=Package /p:PackageAsSingleFile=true /p:SkipInvalidConfigurations=true /p:DesktopBuildPackageLocation="$(build.artifactStagingDirectory)\WebApp.zip" /p:DeployIisAppPath="Default Web Site"'
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    verbose: false
+- script: './node_modules/.bin/node-sass Tailspin.SpaceGame.Web/wwwroot --output Tailspin.SapceGame.Web/wwwroot'
+  displayName: 'COmpile Sass assets'
 
-- task: VSTest@2
+- task: gulp@1
+  displayName: 'Run gulp tasks'
+
+- script: 'echo "$(Build.DefinationName),$(Build.BuildId),$(Build.BuildNumber)" >buildinfo.txt'
+  DisplayName: 'Write build info'
+  workingDirectory: Tailspin.SapceGame.Web/wwwroot
+
+- task: DotNetCoreCLI@2
+  displayName: 'Restore Project dependencies'
   inputs:
-    platform: '$(buildPlatform)'
-    configuration: '$(buildConfiguration)'
+    command: 'restore'
+    projects: '**/*.csproj'
+
+- task: DotNetCoreCLI@2
+  displayName: 'Build the project - Release'
+  inputs:
+    command: 'build'
+    arguments: '--no-restore --configuration Release'
+    projects: '**/*.csproj'
