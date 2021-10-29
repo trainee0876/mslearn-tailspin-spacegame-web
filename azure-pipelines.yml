@@ -31,7 +31,7 @@ steps:
   displayName: 'Run gulp tasks'
 
 - script: 'echo "$(Build.DefinationName),$(Build.BuildId),$(Build.BuildNumber)" >buildinfo.txt'
-  DisplayName: 'Write build info'
+  displayName: 'Write build info'
   workingDirectory: Tailspin.SapceGame.Web/wwwroot
 
 - task: DotNetCoreCLI@2
