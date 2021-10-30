@@ -40,7 +40,7 @@ steps:
   displayName: 'Restore project dependencies'
   inputs:
     command: 'restore'
-    restoreSolution: '**/*.*'
+    restoreSolution: '**/*.bash'
     feedsToUse: 'select'
     vstsFeed: '$(Syste.TeamProject)/Tailspin.SpaceGame.Web.Models'
 
